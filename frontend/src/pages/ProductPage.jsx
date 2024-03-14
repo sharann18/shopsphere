@@ -1,6 +1,6 @@
-import React, { useEffect }  from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { Row, Col, Image, ListGroup, Button } from 'react-bootstrap'
+import React, { useEffect, useState }  from 'react'
+import { Link, useParams, useNavigate } from 'react-router-dom'
+import { Row, Col, Image, ListGroup, Button, Form } from 'react-bootstrap'
 import Rating from '../components/Rating'
 import Loader from '../components/Loader'
 import Message from '../components/Message'
@@ -8,19 +8,20 @@ import { PRODUCT_DETAILS_REQUEST, PRODUCT_DETAILS_SUCCESS, PRODUCT_DETAILS_FAILE
 import axios from 'axios'
 import { useProductsStore } from '../store'
 
-const ProductPage = () => {
+const ProductPage = ({ }) => {
   const { id } = useParams();
   const { product, loading, error, dispatchDetails } = useProductsStore()
+  const [quantity, setQuantity] = useState(1)
+  const navigateTo = useNavigate();
 
   useEffect(() => {
     async function fetchProduct() {
         try {
           dispatchDetails({ type: PRODUCT_DETAILS_REQUEST });
 
-            const { data } = await axios.get(`/api/product/${id}`);
-            console.log(data);
+          const { data } = await axios.get(`/api/product/${id}`);
 
-            dispatchDetails({ type: PRODUCT_DETAILS_SUCCESS, payload: data });
+          dispatchDetails({ type: PRODUCT_DETAILS_SUCCESS, payload: data });
         } catch(error) {
             const errorMessage = error.response && error.response.data && error.response.data.message
                 ? error.response.data.message
@@ -30,11 +31,15 @@ const ProductPage = () => {
                 type: PRODUCT_DETAILS_FAILED,
                 payload: errorMessage
             });
-        }
-    }
+          }
+      }
 
-    fetchProduct();
-}, []);
+      fetchProduct();
+  }, []);
+
+  const addToCartHandler = () => {
+    navigateTo(`/cart/${id}?quantity=${quantity}`)
+  }
 
   return (
     <div>
@@ -54,7 +59,7 @@ const ProductPage = () => {
                 <Rating value={product.rating} color={'#f8e825'} text={`${product.numReviews} reviews`}/>
               </ListGroup.Item>
               <ListGroup.Item>
-                Description: {product.description}
+                <b>Description</b>: {product.description}
               </ListGroup.Item>
             </ListGroup>
             </Col>
@@ -62,18 +67,45 @@ const ProductPage = () => {
               <ListGroup>
                 <ListGroup.Item>
                   <Row>
-                    <Col>Price: </Col>
+                    <Col>Price </Col>
                     <Col><strong>${product.price}</strong></Col>
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
                 <Row>
-                  <Col>Status: </Col>
+                  <Col>Status </Col>
                   <Col>{product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</Col>
                 </Row>
               </ListGroup.Item>
+
+              {product.countInStock > 0 && 
+                (
+                  <ListGroup.Item>
+                    <Row>
+                      <Col className='my-auto'>Quantity </Col>
+                      <Col xs='auto' className='mx-4'>
+                        <Form.Select
+                        size="sm" 
+                        as='select' 
+                        defaultValue={quantity} 
+                        onChange={(e)=>(setQuantity(e.target.value))}>
+                          {
+                            [...Array(product.countInStock).keys()].map((x) => 
+                              (<option key={x+1} value={x+1}>
+                                  {x + 1}
+                                </option>)
+                            )
+                          }
+                        </Form.Select>
+                      </Col>
+                    </Row>
+                  
+                  </ListGroup.Item>
+                )
+              }
+
               <ListGroup.Item>
-                <Button className='btn' style={{ width: '100%' }} type='button' disabled={product.countInStock === 0 && true}> 
+                <Button className='btn' style={{ width: '100%' }} type='button' disabled={product.countInStock === 0 && true} onClick={addToCartHandler}> 
                   Add to Cart
                 </Button>
               </ListGroup.Item>
