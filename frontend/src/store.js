@@ -28,8 +28,14 @@ export const useCartStore = create(zukeeper((set) => ({
                 cartItems:[...state.cartItems, item]
             }
         }
+    }),
+    removeItem: (removeItemId) => set((state) => {
+        return {
+            ...state,
+            cartItems: state.cartItems.filter(x => x.product !== removeItemId)
+        }
     })
 })));
 
 
-window.store = useCartStore
+window.Storage = useCartStore
