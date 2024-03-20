@@ -37,5 +37,33 @@ export const useCartStore = create(zukeeper((set) => ({
     })
 })));
 
+export const useUserStore = create(zukeeper((set) => ({
+    user: JSON.parse(localStorage.getItem('user')) || null,
+    loading: false,
+    error: "",
+    loginWait:() => set((state) => {
+        return {
+            ...state,
+            loading: true
+        }
+    }),
+    login: (userData) => set((state) => {
+        return {
+            ...state,
+            user: userData,
+            loading: false
+        }
+    }),
+    loginFail: (errorData) => set((state) => {
+        return {
+            ...state,
+            error: errorData,
+            loading: false
+        }
+    }),
+    logout: () => set((state) => ({...state, user: null})
+    )
+})))
 
-window.Storage = useCartStore
+
+window.store = useUserStore

@@ -16,7 +16,7 @@ const CartPage = () => {
     async function fetchProduct() {
       try {
         if (!id || !quantity) return;
-        const { data } = await axios.get(`/api/product/${id}`);
+        const { data } = await axios.get(`/api/products/${id}`);
         
         addItem({
             product: data._id,

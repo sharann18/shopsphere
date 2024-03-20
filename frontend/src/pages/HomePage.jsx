@@ -20,8 +20,8 @@ function HomePage() {
         dispatchList({ type: PRODUCT_LIST_SUCCESS, payload: data })
         
       } catch(error) {
-        const errorMessage = error.response && error.response.data && error.response.data.message
-          ? error.response.data.message
+        const errorMessage = error.response && error.response.data && error.response.data.detail
+          ? error.response.data.detail
           : error.message;
 
           dispatchList({
